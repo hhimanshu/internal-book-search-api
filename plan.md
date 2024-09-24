@@ -15,9 +15,9 @@
 - [x] Install Maven
   - [x] Add Maven to system PATH
   - [x] Verify installation by running `mvn -version` in the terminal
-- [ ] Create a new Maven project
-  - [ ] Run `mvn archetype:generate -DgroupId=com.example -DartifactId=book-search-api -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false`
-  - [ ] Navigate to the project directory: `cd book-search-api`
+- [x] Create a new Maven project
+  - x] Run `mvn archetype:generate -DgroupId=com.example -DartifactId=book-search-api -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false`
+  - [x] Navigate to the project directory: `cd book-search-api`
 - [ ] Add Blade framework dependency to `pom.xml`
   - [ ] Open `pom.xml` and add the following dependency:
     ```xml
