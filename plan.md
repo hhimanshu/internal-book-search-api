@@ -32,7 +32,7 @@
   - [x] Verify installation by running `docker --version` in the terminal
 - [x] Create a `docker-compose.yml` file
   - [x] Define services for the Java application and PostgreSQL
-- [ ] Test the connection between the Java application and PostgreSQL
+- [x] Test the connection between the Java application and PostgreSQL
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
 
