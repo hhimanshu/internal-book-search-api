@@ -18,28 +18,18 @@
 - [x] Create a new Maven project
   - x] Run `mvn archetype:generate -DgroupId=com.example -DartifactId=book-search-api -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false`
   - [x] Navigate to the project directory: `cd book-search-api`
-- [ ] Add Blade framework dependency to `pom.xml`
-  - [ ] Open `pom.xml` and add the following dependency:
-    ```xml
-    <dependency>
-        <groupId>com.bladejava</groupId>
-        <artifactId>blade-mvc</artifactId>
-        <version>2.0.15.RELEASE</version>
-    </dependency>
-    ```
-- [ ] Implement a "Hello World" API endpoint
-  - [ ] Create a new Java class `src/main/java/com/example/App.java`
-  - [ ] Implement a simple Blade application with a "Hello World" endpoint
-- [ ] Test the API
-  - [ ] Run the application
-  - [ ] Use a tool like cURL or Postman to test the endpoint
+- [x] Add Sprign Boot framework dependency to `pom.xml`
+- [x] Implement a "Hello World" API endpoint
+- [x] Test the API
+  - [x] Run the application
+  - [x] Open in the browser or use cURL to test the endpoint
 
 ## Module 3: Dockerizing the Project with PostgreSQL
 
-- [ ] Install Docker
-  - [ ] Download Docker Desktop from the official website
-  - [ ] Install and start Docker
-  - [ ] Verify installation by running `docker --version` in the terminal
+- [x] Install Docker
+  - [x] Download Docker Desktop from the official website
+  - [x] Install and start Docker
+  - [x] Verify installation by running `docker --version` in the terminal
 - [ ] Create a Dockerfile for the Java application
   - [ ] Create a new file named `Dockerfile` in the project root
   - [ ] Write Dockerfile instructions to build the Java application

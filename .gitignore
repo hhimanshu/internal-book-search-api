@@ -47,6 +47,4 @@ tmp*/
 local.properties
 .settings/
 .loadpath
-target/surefire-reports/com.h2.AppTest.txt
-target/surefire-reports/TEST-com.h2.AppTest.xml
-target/surefire-reports/com.h2.AppTest.txt
+target/
