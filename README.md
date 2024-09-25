@@ -67,3 +67,32 @@ mvn archetype:generate -DgroupId=com.h2 -DartifactId=book-search-api -Darchetype
 ```
 cd book-search-api && mvn clean install
 ```
+
+## Module 3: Dockerizing the Project with PostgreSQL
+
+- Start container
+
+  ```
+  docker-compose up -d
+  ```
+
+- Connect to database
+  ```
+  docker exec -it library-db psql -U admin -d library
+  ```
+- Verify version
+
+```
+SELECT version();
+```
+
+- List databases
+
+```
+\l
+```
+
+- Stop container
+  ```
+  docker-compose down
+  ```
