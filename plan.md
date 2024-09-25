@@ -30,16 +30,9 @@
   - [x] Download Docker Desktop from the official website
   - [x] Install and start Docker
   - [x] Verify installation by running `docker --version` in the terminal
-- [ ] Create a Dockerfile for the Java application
-  - [ ] Create a new file named `Dockerfile` in the project root
-  - [ ] Write Dockerfile instructions to build the Java application
-- [ ] Create a `docker-compose.yml` file
-  - [ ] Define services for the Java application and PostgreSQL
-- [ ] Create a PostgreSQL initialization script
-  - [ ] Create a new file `init.sql` for database setup
-- [ ] Build and run Docker containers
-  - [ ] Run `docker-compose up --build`
-- [ ] Test the connection between the Java application and PostgreSQL
+- [x] Create a `docker-compose.yml` file
+  - [x] Define services for the Java application and PostgreSQL
+- [x] Test the connection between the Java application and PostgreSQL
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
 

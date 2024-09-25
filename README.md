@@ -67,3 +67,56 @@ mvn archetype:generate -DgroupId=com.h2 -DartifactId=book-search-api -Darchetype
 ```
 cd book-search-api && mvn clean install
 ```
+
+## Module 3: Dockerizing the Project with PostgreSQL
+
+- Start container
+
+  ```
+  docker-compose up -d
+  ```
+
+- Connect to database
+  ```
+  docker exec -it library-db psql -U admin -d library
+  ```
+- Verify version
+
+```
+SELECT version();
+```
+
+- List databases
+
+```
+\l
+```
+
+- Stop container
+
+  ```
+  docker-compose down
+  ```
+
+- Test the connection between the Java application and PostgreSQL
+
+```
+mvn spring-boot:run
+```
+
+This should print the PostgreSQL version in the console. This is because of the following reasoning
+
+```
+The DatabaseTestRunner class is running because it implements the CommandLineRunner interface and is annotated with @Component. In Spring Boot, any bean that implements CommandLineRunner will be executed after the application context is loaded.
+
+Explanation
+@Component Annotation: The @Component annotation marks the DatabaseTestRunner class as a Spring bean. This means it will be automatically detected and registered by Spring's component scanning.
+
+CommandLineRunner Interface: The CommandLineRunner interface has a single method, run(String... args), which is called just before the Spring Boot application finishes starting up. This allows you to run additional code after the application context is loaded.
+
+How It Works
+When you run mvn spring-boot:run, Spring Boot starts the application.
+During the startup process, Spring Boot scans for components and finds the DatabaseTestRunner class because it is annotated with @Component.
+Spring Boot creates an instance of DatabaseTestRunner and calls its run method because it implements CommandLineRunner.
+The run method executes the SQL query to get the PostgreSQL version and prints it to the console.
+```
