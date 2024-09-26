@@ -123,16 +123,34 @@ The run method executes the SQL query to get the PostgreSQL version and prints i
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
 
+- Setup PGAdmin
+
+  ```
+  docker pull dpage/pgadmin4
+  docker run -p 80:80 \
+    -e 'PGADMIN_DEFAULT_EMAIL=user@domain.com' \
+    -e 'PGADMIN_DEFAULT_PASSWORD=SuperSecret' \
+    -d dpage/pgadmin4
+  ```
+
 - Create tables and relationships
 
 ```
+
 docker cp db/create_schema.sql library-db:/create_schema.sql
 docker exec -it library-db psql -U admin -d library -f /create_schema.sql
+
 ```
 
 - Insert sample data
 
 ```
+
 docker cp db/insert.sql library-db:/insert.sql
 docker exec -it library-db psql -U admin -d library -f /insert.sql
+
+```
+
+```
+
 ```
