@@ -132,6 +132,7 @@ The run method executes the SQL query to get the PostgreSQL version and prints i
     -e 'PGADMIN_DEFAULT_PASSWORD=SuperSecret' \
     -d dpage/pgadmin4
   ```
+  Visit `http://localhost:80` in your browser
 
 - Create tables and relationships
 
