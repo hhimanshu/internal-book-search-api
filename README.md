@@ -120,3 +120,12 @@ During the startup process, Spring Boot scans for components and finds the Datab
 Spring Boot creates an instance of DatabaseTestRunner and calls its run method because it implements CommandLineRunner.
 The run method executes the SQL query to get the PostgreSQL version and prints it to the console.
 ```
+
+## Module 4: Designing the Database Schema and Implementing Full-Text Search
+
+- Create tables and relationships
+
+```
+docker cp db/create_schema.sql library-db:/create_schema.sql
+docker exec -it library-db psql -U admin -d library -f /create_schema.sql
+```
