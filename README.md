@@ -129,3 +129,10 @@ The run method executes the SQL query to get the PostgreSQL version and prints i
 docker cp db/create_schema.sql library-db:/create_schema.sql
 docker exec -it library-db psql -U admin -d library -f /create_schema.sql
 ```
+
+- Insert sample data
+
+```
+docker cp db/insert.sql library-db:/insert.sql
+docker exec -it library-db psql -U admin -d library -f /insert.sql
+```
