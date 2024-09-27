@@ -48,3 +48,4 @@ local.properties
 .settings/
 .loadpath
 target/
+.DS_Store

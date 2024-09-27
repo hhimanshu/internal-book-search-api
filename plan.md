@@ -36,39 +36,38 @@
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
 
-- [ ] Design the book schema
-  - [ ] Identify necessary tables (e.g., books, authors, categories)
-  - [ ] Define relationships between tables
-  - [ ] Determine primary and foreign keys
-- [ ] Create SQL scripts for schema setup
-  - [ ] Write CREATE TABLE statements
-  - [ ] Add necessary constraints and indexes
-- [ ] Implement full-text search in PostgreSQL
-  - [ ] Research PostgreSQL full-text search capabilities
-  - [ ] Create necessary indexes for full-text search
-  - [ ] Write sample full-text search queries
-- [ ] Test full-text search functionality
-  - [ ] Insert sample data
-  - [ ] Run and verify search queries
+- [x] Design the book schema
+  - [x] Identify necessary tables (e.g., books, authors, categories)
+  - [x] Define relationships between tables
+  - [x] Determine primary and foreign keys
+- [x] Create SQL scripts for schema setup
+  - [x] Write CREATE TABLE statements
+  - [x] Add necessary constraints and indexes
+- [x] Implement full-text search in PostgreSQL
+  - [x] Research PostgreSQL full-text search capabilities
+  - [x] Create necessary indexes for full-text search
+  - [x] Write sample full-text search queries
+- [x] Test full-text search functionality
+  - [x] Insert sample data
+  - [x] Run and verify search queries
 
 ## Module 5: Ingesting and Validating Data
 
-- [ ] Choose a public archive for book data
-  - [ ] Research available options (e.g., Project Gutenberg, Open Library)
-  - [ ] Determine data format and structure
-- [ ] Write a script to download data
-  - [ ] Implement data fetching logic
-  - [ ] Handle pagination if necessary
-- [ ] Develop a data ingestion script
-  - [ ] Parse downloaded data
-  - [ ] Map data to database schema
-  - [ ] Implement batch insert for efficiency
-- [ ] Implement data validation
-  - [ ] Check for required fields
+- [x] Choose a public archive for book data
+  - [x] Research available options (e.g., Project Gutenberg, Open Library)
+  - [x] Determine data format and structure
+- [x] Write a script to download data
+  - [x] Implement data fetching logic
+  - [x] Handle pagination if necessary
+- [x] Develop a data ingestion script
+  - [x] Parse downloaded data
+  - [x] Map data to database schema
+- [x] Implement data validation
+  - [x] Check for required fields
   - [ ] Validate data types and formats (e.g., ISBN)
-- [ ] Create SQL queries for data integrity checks
-  - [ ] Write queries to verify record counts
-  - [ ] Implement checks for data consistency
+- [x] Create SQL queries for data integrity checks
+  - [x] Write queries to verify record counts
+  - [x] Implement checks for data consistency
 
 ## Module 6: Implementing Business Logic and Writing Tests
 
