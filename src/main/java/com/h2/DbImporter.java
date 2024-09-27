@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.*;
 import java.sql.*;
 import java.util.*;
-import java.util.regex.*;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -14,8 +13,7 @@ import com.opencsv.exceptions.CsvValidationException;
 
 public class DbImporter {
 
-    // private static final String CSV_URL = "https://raw.githubusercontent.com/scostap/goodreads_bbe_dataset/main/Best_Books_Ever_dataset/books_1.Best_Books_Ever.csv";
-    private static final String CSV_URL = "https://gist.github.com/hhimanshu/8b51f9cd92bee82d8878dbb9c48a388b/raw/342a95aa594349414c069e2ca74faabb01382213/books_20k.csv";
+    private static final String CSV_URL = "https://gist.github.com/hhimanshu/d55d17b51e0a46a37b739d0f3d3e3c74/raw/5b9027cf7b1641546c1948caffeaa44129b7db63/books.csv";
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/library";
     private static final String DB_USER = "admin";
     private static final String DB_PASSWORD = "admin123";
@@ -32,15 +30,9 @@ public class DbImporter {
             System.out.println("Parsing CSV data...");
             List<String[]> records = parseCSV(csvStream);
 
-            // Step 2.5: Print all records
-            System.out.println("Printing all records...");
-            for (String[] record : records) {
-                System.out.println(Arrays.toString(record));
-            }
-
             // Step 3: Insert Data into Database
-            // System.out.println("Inserting data into database...");
-            // insertData(records);
+            System.out.println("Inserting data into database...");
+            insertData(records);
 
             System.out.println("Data ingestion completed successfully.");
 
@@ -62,21 +54,43 @@ public class DbImporter {
         List<String[]> records = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(csvStream));
         String line;
-        Pattern pattern = Pattern.compile("\"([^\"]*)\"|(\\S+)");
+        StringBuilder sb = new StringBuilder();
+        boolean inQuotes = false;
+
         while ((line = reader.readLine()) != null) {
-            List<String> fields = new ArrayList<>();
-            Matcher matcher = pattern.matcher(line);
-            while (matcher.find()) {
-                if (matcher.group(1) != null) {
-                    fields.add(matcher.group(1));
+            if (inQuotes) {
+                sb.append("\n").append(line);
+                if (line.endsWith("\"")) {
+                    inQuotes = false;
+                    records.add(parseLine(sb.toString()));
+                    sb.setLength(0);
+                }
+            } else {
+                if (line.startsWith("\"") && !line.endsWith("\"")) {
+                    inQuotes = true;
+                    sb.append(line);
                 } else {
-                    fields.add(matcher.group(2));
+                    records.add(parseLine(line));
                 }
             }
-            records.add(fields.toArray(new String[0]));
         }
         reader.close();
         return records;
+    }
+
+    // Parse a single line using OpenCSV
+    private static String[] parseLine(String line) throws IOException, CsvValidationException {
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(',')
+                .withQuoteChar('"')
+                .withEscapeChar('\\')
+                .withStrictQuotes(false)
+                .withIgnoreLeadingWhiteSpace(true)
+                .build();
+        CSVReader csvReader = new CSVReaderBuilder(new StringReader(line))
+                .withCSVParser(parser)
+                .build();
+        return csvReader.readNext();
     }
 
     // Insert data into the database
@@ -88,7 +102,7 @@ public class DbImporter {
             System.out.println("Connected to the database.");
 
             // Prepare SQL statements
-            String insertBookSQL = "INSERT INTO books (title, series, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, cover_img, bbe_score, bbe_votes, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING book_id";
+            String insertBookSQL = "INSERT INTO books (title, series, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING book_id";
             PreparedStatement insertBookStmt = conn.prepareStatement(insertBookSQL);
 
             String insertAuthorSQL = "INSERT INTO authors (name) VALUES (?) ON CONFLICT (name) DO NOTHING";
@@ -99,8 +113,6 @@ public class DbImporter {
 
             String insertBookAuthorSQL = "INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)";
             PreparedStatement insertBookAuthorStmt = conn.prepareStatement(insertBookAuthorSQL);
-
-            // Similar prepared statements for genres, characters, awards, settings, and ratings
 
             // Process each record
             for (String[] record : records) {
@@ -129,9 +141,6 @@ public class DbImporter {
                     String publishDateStr = record[12];
                     String firstPublishDateStr = record[13];
                     String likedPercentStr = record[14];
-                    String coverImg = record[15];
-                    String bbeScoreStr = record[16];
-                    String bbeVotesStr = record[17];
                     String priceStr = record[18];
 
                     // Convert data types
@@ -140,8 +149,6 @@ public class DbImporter {
                     java.sql.Date publishDate = publishDateStr.isEmpty() ? null : java.sql.Date.valueOf(publishDateStr);
                     java.sql.Date firstPublishDate = firstPublishDateStr.isEmpty() ? null : java.sql.Date.valueOf(firstPublishDateStr);
                     Double likedPercent = likedPercentStr.isEmpty() ? null : Double.parseDouble(likedPercentStr);
-                    Integer bbeScore = bbeScoreStr.isEmpty() ? null : Integer.parseInt(bbeScoreStr);
-                    Integer bbeVotes = bbeVotesStr.isEmpty() ? null : Integer.parseInt(bbeVotesStr);
                     Double price = priceStr.isEmpty() ? null : Double.parseDouble(priceStr);
 
                     // Insert book
@@ -158,10 +165,7 @@ public class DbImporter {
                     insertBookStmt.setObject(11, publishDate);
                     insertBookStmt.setObject(12, firstPublishDate);
                     insertBookStmt.setObject(13, likedPercent);
-                    insertBookStmt.setString(14, coverImg);
-                    insertBookStmt.setObject(15, bbeScore);
-                    insertBookStmt.setObject(16, bbeVotes);
-                    insertBookStmt.setObject(17, price);
+                    insertBookStmt.setObject(14, price);
 
                     ResultSet bookRs = insertBookStmt.executeQuery();
                     int bookId = 0;
@@ -188,8 +192,6 @@ public class DbImporter {
                         insertBookAuthorStmt.setInt(2, authorId);
                         insertBookAuthorStmt.executeUpdate();
                     }
-
-                    // Similar operations for genres, characters, awards, settings, and ratings
 
                     // Commit transaction after each record
                     conn.commit();
