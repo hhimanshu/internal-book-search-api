@@ -162,6 +162,12 @@ FROM books
 WHERE title ILIKE '%hunger games%'
    OR description ILIKE '%hunger games%';
 ```
+- Discuss the limitations of case-insensitive search
+1. Case-insensitive search is not efficient for large datasets.
+2. It does not handle word variations (e.g., "game" vs. "games").
+3. It does not support partial word matches (e.g., "hunger" vs. "hunger games").
+4. It does not consider the relevance of search results.
+5. It does not provide advanced search features like phrase matching or stemming.
 
 - full-text search
 ```sql
