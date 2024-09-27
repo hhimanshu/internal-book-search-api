@@ -36,20 +36,20 @@
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
 
-- [ ] Design the book schema
-  - [ ] Identify necessary tables (e.g., books, authors, categories)
-  - [ ] Define relationships between tables
-  - [ ] Determine primary and foreign keys
-- [ ] Create SQL scripts for schema setup
-  - [ ] Write CREATE TABLE statements
-  - [ ] Add necessary constraints and indexes
-- [ ] Implement full-text search in PostgreSQL
-  - [ ] Research PostgreSQL full-text search capabilities
-  - [ ] Create necessary indexes for full-text search
-  - [ ] Write sample full-text search queries
-- [ ] Test full-text search functionality
-  - [ ] Insert sample data
-  - [ ] Run and verify search queries
+- [x] Design the book schema
+  - [x] Identify necessary tables (e.g., books, authors, categories)
+  - [x] Define relationships between tables
+  - [x] Determine primary and foreign keys
+- [x] Create SQL scripts for schema setup
+  - [x] Write CREATE TABLE statements
+  - [x] Add necessary constraints and indexes
+- [x] Implement full-text search in PostgreSQL
+  - [x] Research PostgreSQL full-text search capabilities
+  - [x] Create necessary indexes for full-text search
+  - [x] Write sample full-text search queries
+- [x] Test full-text search functionality
+  - [x] Insert sample data
+  - [x] Run and verify search queries
 
 ## Module 5: Ingesting and Validating Data
 
