@@ -266,3 +266,17 @@ ORDER BY rank DESC;
 -- How query works
 SELECT plainto_tsquery('english', 'dystopian future');
 ````
+
+## Module 5: Ingesting and Validating Data
+- Query after ingestion
+```sql
+select count(*) from authors;
+select count(*) from books;
+select count(*) from book_authors;
+
+SELECT b.*, a."name" as author_name
+FROM books b
+JOIN book_authors ba ON b.book_id = ba.book_id
+JOIN authors a ON ba.author_id = a.author_id
+WHERE a.name = 'Steve Wozniak'; -- Sundar Pichai
+```
