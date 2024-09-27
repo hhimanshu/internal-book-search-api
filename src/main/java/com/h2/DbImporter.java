@@ -1,6 +1,7 @@
 package com.h2;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.net.*;
 import java.sql.*;
 import java.util.*;
@@ -56,8 +57,14 @@ public class DbImporter {
         String line;
         StringBuilder sb = new StringBuilder();
         boolean inQuotes = false;
+        boolean isFirstLine = true;
 
         while ((line = reader.readLine()) != null) {
+            if (isFirstLine) {
+                isFirstLine = false;
+                continue; // Skip the header row
+            }
+
             if (inQuotes) {
                 sb.append("\n").append(line);
                 if (line.endsWith("\"")) {
@@ -102,8 +109,9 @@ public class DbImporter {
             System.out.println("Connected to the database.");
 
             // Prepare SQL statements
-            String insertBookSQL = "INSERT INTO books (title, series, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING book_id";
-            PreparedStatement insertBookStmt = conn.prepareStatement(insertBookSQL);
+            String insertBookSQL = "INSERT INTO books (title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) " +
+                                   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                                   "ON CONFLICT";
 
             String insertAuthorSQL = "INSERT INTO authors (name) VALUES (?) ON CONFLICT (name) DO NOTHING";
             PreparedStatement insertAuthorStmt = conn.prepareStatement(insertAuthorSQL);
@@ -121,76 +129,95 @@ public class DbImporter {
                     System.out.println("Processing record: " + Arrays.toString(record));
 
                     // Ensure the record has the expected number of columns
-                    if (record.length < 19) {
+                    if (record.length < 15) {
                         System.err.println("Skipping malformed record: " + Arrays.toString(record));
                         continue;
                     }
 
                     // Map CSV columns to variables
                     String title = record[1];
-                    String series = record[2];
-                    String authorsStr = record[3];
-                    String ratingStr = record[4];
-                    String description = record[5];
-                    String language = record[6];
-                    String isbn = record[7];
-                    String bookFormat = record[8];
-                    String edition = record[9];
-                    String pagesStr = record[10];
-                    String publisher = record[11];
-                    String publishDateStr = record[12];
-                    String firstPublishDateStr = record[13];
-                    String likedPercentStr = record[14];
-                    String priceStr = record[18];
+                    String authorsStr = record[2];
+                    String ratingStr = record[3];
+                    String description = record[4];
+                    String language = record[5];
+                    String isbn = record[6];
+                    String bookFormat = record[7];
+                    String edition = record[8];
+                    String pagesStr = record[9];
+                    String publisher = record[10];
+                    String publishDateStr = record[11];
+                    String firstPublishDateStr = record[12];
+                    String likedPercentStr = record[13];
+                    String priceStr = record[14];
 
                     // Convert data types
-                    Double rating = ratingStr.isEmpty() ? null : Double.parseDouble(ratingStr);
+                    BigDecimal rating = ratingStr.isEmpty() ? null : new BigDecimal(ratingStr);
                     Integer pages = pagesStr.isEmpty() ? null : Integer.parseInt(pagesStr);
                     java.sql.Date publishDate = publishDateStr.isEmpty() ? null : java.sql.Date.valueOf(publishDateStr);
                     java.sql.Date firstPublishDate = firstPublishDateStr.isEmpty() ? null : java.sql.Date.valueOf(firstPublishDateStr);
-                    Double likedPercent = likedPercentStr.isEmpty() ? null : Double.parseDouble(likedPercentStr);
-                    Double price = priceStr.isEmpty() ? null : Double.parseDouble(priceStr);
+                    BigDecimal likedPercent = likedPercentStr.isEmpty() ? null : new BigDecimal(likedPercentStr);
+                    BigDecimal price = priceStr.isEmpty() ? null : new BigDecimal(priceStr);
 
                     // Insert book
-                    insertBookStmt.setString(1, title);
-                    insertBookStmt.setString(2, series);
-                    insertBookStmt.setObject(3, rating);
-                    insertBookStmt.setString(4, description);
-                    insertBookStmt.setString(5, language);
-                    insertBookStmt.setString(6, isbn);
-                    insertBookStmt.setString(7, bookFormat);
-                    insertBookStmt.setString(8, edition);
-                    insertBookStmt.setObject(9, pages);
-                    insertBookStmt.setString(10, publisher);
-                    insertBookStmt.setObject(11, publishDate);
-                    insertBookStmt.setObject(12, firstPublishDate);
-                    insertBookStmt.setObject(13, likedPercent);
-                    insertBookStmt.setObject(14, price);
+                    try (PreparedStatement pstmt = conn.prepareStatement(insertBookSQL)) {
+                        pstmt.setString(1, title);
+                        pstmt.setBigDecimal(2, rating);
+                        pstmt.setString(3, description);
+                        pstmt.setString(4, language);
+                        pstmt.setString(5, isbn); // isbn can be null
+                        pstmt.setString(6, bookFormat);
+                        pstmt.setString(7, edition);
+                        pstmt.setInt(8, pages);
+                        pstmt.setString(9, publisher);
+                        pstmt.setDate(10, publishDate);
+                        pstmt.setDate(11, firstPublishDate);
+                        pstmt.setBigDecimal(12, likedPercent);
+                        pstmt.setBigDecimal(13, price);
+                        pstmt.executeUpdate();
+                    }
 
-                    ResultSet bookRs = insertBookStmt.executeQuery();
+                    // Retrieve book_id
                     int bookId = 0;
-                    if (bookRs.next()) {
-                        bookId = bookRs.getInt("book_id");
+                    if (isbn != null && !isbn.isEmpty()) {
+                        // Use isbn to retrieve book_id
+                        String selectBookIdSql = "SELECT book_id FROM books WHERE isbn = ?";
+                        try (PreparedStatement selectBookIdStmt = conn.prepareStatement(selectBookIdSql)) {
+                            selectBookIdStmt.setString(1, isbn);
+                            ResultSet bookRs = selectBookIdStmt.executeQuery();
+                            if (bookRs.next()) {
+                                bookId = bookRs.getInt("book_id");
+                            }
+                        }
+                    } else {
+                        // Retrieve the last inserted book_id for entries without isbn
+                        String selectBookIdSql = "SELECT currval(pg_get_serial_sequence('books', 'book_id')) AS book_id";
+                        try (Statement stmt = conn.createStatement()) {
+                            ResultSet bookRs = stmt.executeQuery(selectBookIdSql);
+                            if (bookRs.next()) {
+                                bookId = bookRs.getInt("book_id");
+                            }
+                        }
                     }
 
                     // Insert authors
                     String[] authors = authorsStr.split(",");
                     for (String authorName : authors) {
                         authorName = authorName.trim();
-                        // Insert author if not exists
+                        // Insert author
                         insertAuthorStmt.setString(1, authorName);
                         insertAuthorStmt.executeUpdate();
                         // Retrieve author_id
                         selectAuthorStmt.setString(1, authorName);
-                        ResultSet authorRs = selectAuthorStmt.executeQuery();
-                        int authorId = 0;
-                        if (authorRs.next()) {
-                            authorId = authorRs.getInt("author_id");
+                        try (ResultSet authorRs = selectAuthorStmt.executeQuery()) {
+                            int authorId = 0;
+                            if (authorRs.next()) {
+                                authorId = authorRs.getInt("author_id");
+                            }
+                            // Insert into book_authors
+                            insertBookAuthorStmt.setInt(1, bookId);
+                            insertBookAuthorStmt.setInt(2, authorId);
+                            insertBookAuthorStmt.executeUpdate();
                         }
-                        // Insert into book_authors
-                        insertBookAuthorStmt.setInt(1, bookId);
-                        insertBookAuthorStmt.setInt(2, authorId);
-                        insertBookAuthorStmt.executeUpdate();
                     }
 
                     // Commit transaction after each record
