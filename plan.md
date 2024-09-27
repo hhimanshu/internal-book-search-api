@@ -53,22 +53,21 @@
 
 ## Module 5: Ingesting and Validating Data
 
-- [ ] Choose a public archive for book data
-  - [ ] Research available options (e.g., Project Gutenberg, Open Library)
-  - [ ] Determine data format and structure
-- [ ] Write a script to download data
-  - [ ] Implement data fetching logic
-  - [ ] Handle pagination if necessary
-- [ ] Develop a data ingestion script
-  - [ ] Parse downloaded data
-  - [ ] Map data to database schema
-  - [ ] Implement batch insert for efficiency
-- [ ] Implement data validation
-  - [ ] Check for required fields
+- [x] Choose a public archive for book data
+  - [x] Research available options (e.g., Project Gutenberg, Open Library)
+  - [x] Determine data format and structure
+- [x] Write a script to download data
+  - [x] Implement data fetching logic
+  - [x] Handle pagination if necessary
+- [x] Develop a data ingestion script
+  - [x] Parse downloaded data
+  - [x] Map data to database schema
+- [x] Implement data validation
+  - [x] Check for required fields
   - [ ] Validate data types and formats (e.g., ISBN)
-- [ ] Create SQL queries for data integrity checks
-  - [ ] Write queries to verify record counts
-  - [ ] Implement checks for data consistency
+- [x] Create SQL queries for data integrity checks
+  - [x] Write queries to verify record counts
+  - [x] Implement checks for data consistency
 
 ## Module 6: Implementing Business Logic and Writing Tests
 
