@@ -132,6 +132,7 @@ The run method executes the SQL query to get the PostgreSQL version and prints i
     -e 'PGADMIN_DEFAULT_PASSWORD=SuperSecret' \
     -d dpage/pgadmin4
   ```
+
   Visit `http://localhost:80` in your browser
 
 - Create tables and relationships
@@ -149,9 +150,113 @@ docker exec -it library-db psql -U admin -d library -f /create_schema.sql
 
 docker cp db/insert.sql library-db:/insert.sql
 docker exec -it library-db psql -U admin -d library -f /insert.sql
-
 ```
 
-```
+### Query the database
+
+- Case insensitive search
 
 ```
+SELECT *
+FROM books
+WHERE title ILIKE '%hunger games%'
+   OR description ILIKE '%hunger games%';
+```
+
+- full-text search
+```sql
+truncate table books cascade;
+
+-- Ensure we have our books table with some relevant data
+INSERT INTO books (title, series, description) VALUES
+('Dystopian Worlds', NULL, 'A comprehensive guide to dystopian literature including works like 1984 and Brave New World.'),
+('The Hunger Games Trilogy', 'The Hunger Games', 'The complete trilogy of The Hunger Games, Catching Fire, and Mockingjay.'),
+('Future Societies', NULL, 'An analysis of fictional future societies in literature, from utopias to dystopias.'),
+('Games and Survival', NULL, 'Exploring the theme of survival games in modern fiction, including Battle Royale and The Hunger Games.');
+
+-- Ensure the search vector is updated
+UPDATE books SET search_vector =
+    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(series, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(description, '')), 'C');
+
+-- Example 1: Using to_tsquery
+SELECT book_id, ts_rank(search_vector, to_tsquery('english', 'dystopian & (future | world)')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ to_tsquery('english', 'dystopian & (future | world)')
+ORDER BY rank DESC;
+
+-- Example 2: Using phraseto_tsquery
+SELECT book_id, ts_rank(search_vector, phraseto_tsquery('english', 'Hunger Games')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ phraseto_tsquery('english', 'Hunger Games')
+ORDER BY rank DESC;
+
+-- Example 3: Using plainto_tsquery
+SELECT book_id, ts_rank(search_vector, plainto_tsquery('english', 'future society dystopia')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ plainto_tsquery('english', 'future society dystopia')
+ORDER BY rank DESC;
+
+-- Demonstrating the difference in query interpretation
+SELECT to_tsquery('english', 'dystopian & (future | world)') AS to_tsquery_result,
+       phraseto_tsquery('english', 'Hunger Games') AS phraseto_tsquery_result,
+       plainto_tsquery('english', 'future society dystopia') AS plainto_tsquery_result;
+```
+
+- Ignore this
+```sql
+-- First, let's add more varied data to our books table
+INSERT INTO books (title, series, description) VALUES
+('The Hunger Games', 'The Hunger Games #1', 'In a dystopian future, Katniss Everdeen voluntarily takes her younger sister''s place in the Hunger Games.'),
+('Catching Fire', 'The Hunger Games #2', 'Katniss Everdeen and Peeta Mellark become targets of the Capitol after their victory in the 74th Hunger Games.'),
+('Mockingjay', 'The Hunger Games #3', 'Katniss Everdeen reluctantly becomes the symbol of a mass rebellion against the autocratic Capitol.'),
+('The Ballad of Songbirds and Snakes', 'The Hunger Games #0', 'A prequel to the Hunger Games series, focusing on Coriolanus Snow''s youth.'),
+('1984', NULL, 'A dystopian novel by George Orwell about a totalitarian future society.'),
+('Brave New World', NULL, 'Aldous Huxley''s novel about a futuristic World State and its citizens.'),
+('The Giver', 'The Giver Quartet #1', 'In a seemingly perfect community, a boy is chosen to inherit the position of Receiver of Memories.'),
+('Divergent', 'Divergent #1', 'In a dystopian Chicago, society is divided into five factions. Beatrice Prior must choose her faction.'),
+('Ready Player One', NULL, 'In 2045, people seek escape from reality through the virtual reality world OASIS.');
+
+-- Update the search vector for all books
+UPDATE books SET search_vector =
+    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(series, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(description, '')), 'C');
+
+-- Example 1: Basic to_tsquery
+SELECT ts_rank(search_vector, to_tsquery('english', 'hunger & games')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ to_tsquery('english', 'hunger & games')
+ORDER BY rank DESC;
+
+-- Example 2: phraseto_tsquery
+SELECT ts_rank(search_vector, phraseto_tsquery('english', 'Hunger Games')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ phraseto_tsquery('english', 'Hunger Games')
+ORDER BY rank DESC;
+
+-- Example 3: Complex to_tsquery
+SELECT ts_rank(search_vector, to_tsquery('english', 'dystopian & !hunger')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ to_tsquery('english', 'dystopian & !hunger')
+ORDER BY rank DESC;
+
+-- Example 4: Demonstrating how ts_rank works with field weights
+SELECT
+       ts_rank(search_vector, to_tsquery('english', 'dystopian')) AS default_rank,
+       ts_rank('{0.1, 0.2, 0.4, 1.0}', search_vector, to_tsquery('english', 'dystopian')) AS custom_rank,
+	   title, series, description
+FROM books
+WHERE search_vector @@ to_tsquery('english', 'dystopian')
+ORDER BY custom_rank DESC;
+
+-- Example 5: Using plainto_tsquery for natural language input
+SELECT ts_rank(search_vector, plainto_tsquery('english', 'dystopian future')) AS rank, title, series, description
+FROM books
+WHERE search_vector @@ plainto_tsquery('english', 'dystopian future')
+ORDER BY rank DESC;
+
+-- How query works
+SELECT plainto_tsquery('english', 'dystopian future');
+````
