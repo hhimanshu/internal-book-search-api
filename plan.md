@@ -71,13 +71,16 @@
 
 ## Module 6: Implementing Business Logic and Writing Tests
 
+> Write persistence layer with tests
+> Implement business logic functions with tests
+
 - [ ] Define core business logic functions
   - [ ] Implement book search functionality
   - [ ] Create methods for filtering and sorting results
-- [ ] Set up JUnit for testing
-  - [ ] Add JUnit dependency to `pom.xml`
-  - [ ] Create a test directory structure
-- [ ] Write unit tests
+- [x] Set up JUnit for testing
+  - [x] Add JUnit dependency to `pom.xml`
+  - [x] Create a test directory structure
+- [x] Write unit tests
   - [ ] Create test cases for each business logic function
   - [ ] Implement edge case tests
 - [ ] Run tests and refine code
