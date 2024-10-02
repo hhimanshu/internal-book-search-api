@@ -107,35 +107,35 @@ public class DbImporter {
         conn.setAutoCommit(false);
 
         String sql = "INSERT INTO books (book_id, title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             for (String[] record : records) {
                 try {
                     // Set parameters
-                    pstmt.setInt(1, Integer.parseInt(record[0])); // book_id
-                    pstmt.setString(2, record[1]); // title
-                    pstmt.setBigDecimal(3, new BigDecimal(record[3])); // rating
-                    pstmt.setString(4, record[4]); // description
-                    pstmt.setString(5, record[5]); // language
-                    pstmt.setString(6, record[6]); // isbn
-                    pstmt.setString(7, record[7]); // book_format
-                    pstmt.setString(8, record[8]); // edition
-                    pstmt.setInt(9, Integer.parseInt(record[9])); // pages
-                    pstmt.setString(10, record[10]); // publisher
-                    pstmt.setDate(11, Date.valueOf(record[11])); // publish_date
-                    pstmt.setDate(12, Date.valueOf(record[12])); // first_publish_date
-                    pstmt.setBigDecimal(13, new BigDecimal(record[13])); // liked_percent
-                    pstmt.setBigDecimal(14, new BigDecimal(record[14])); // price
+                    stmt.setInt(1, Integer.parseInt(record[0])); // book_id
+                    stmt.setString(2, record[1]); // title
+                    stmt.setBigDecimal(3, new BigDecimal(record[3])); // rating
+                    stmt.setString(4, record[4]); // description
+                    stmt.setString(5, record[5]); // language
+                    stmt.setString(6, record[6]); // isbn
+                    stmt.setString(7, record[7]); // book_format
+                    stmt.setString(8, record[8]); // edition
+                    stmt.setInt(9, Integer.parseInt(record[9])); // pages
+                    stmt.setString(10, record[10]); // publisher
+                    stmt.setDate(11, Date.valueOf(record[11])); // publish_date
+                    stmt.setDate(12, Date.valueOf(record[12])); // first_publish_date
+                    stmt.setBigDecimal(13, new BigDecimal(record[13])); // liked_percent
+                    stmt.setBigDecimal(14, new BigDecimal(record[14])); // price
 
-                    pstmt.addBatch();
+                    stmt.addBatch();
                 } catch (Exception e) {
                     System.err.println("Failed to process record: " + Arrays.toString(record));
                     e.printStackTrace();
                 }
             }
 
-            pstmt.executeBatch();
+            stmt.executeBatch();
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();
