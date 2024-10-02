@@ -76,6 +76,7 @@
 
 - [x] Define core business logic functions
   - [x] Implement book search functionality
+  - [ ] Update importer to insert author, book_authors
   - [ ] Get Books by Publisher
   - [ ] Get Books by Author
 - [x] Set up JUnit for testing
