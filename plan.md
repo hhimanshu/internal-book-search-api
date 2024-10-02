@@ -74,14 +74,15 @@
 > Write persistence layer with tests
 > Implement business logic functions with tests
 
-- [ ] Define core business logic functions
-  - [ ] Implement book search functionality
-  - [ ] Create methods for filtering and sorting results
+- [x] Define core business logic functions
+  - [x] Implement book search functionality
+  - [ ] Get Books by Publisher
+  - [ ] Get Books by Author
 - [x] Set up JUnit for testing
   - [x] Add JUnit dependency to `pom.xml`
   - [x] Create a test directory structure
 - [x] Write unit tests
-  - [ ] Create test cases for each business logic function
+  - [x] Create test cases for each business logic function
   - [ ] Implement edge case tests
 - [ ] Run tests and refine code
   - [ ] Execute test suite
