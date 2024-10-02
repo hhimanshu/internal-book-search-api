@@ -24,6 +24,8 @@ public class Book {
     private Date firstPublishDate;
     private BigDecimal likedPercent;
     private BigDecimal price;
+    @Column(name = "search_vector", columnDefinition = "tsvector")
+    private String searchVector;
 
     public Long getBookId() {
         return bookId;

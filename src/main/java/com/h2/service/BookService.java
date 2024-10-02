@@ -16,6 +16,10 @@ public class BookService {
         return bookRepository.findAll();
     }
 
+    public List<Book> searchBooks(String searchTerm) {
+        return bookRepository.searchBooks(searchTerm);
+    }
+
     public Book getBookById(Long id) {
         return bookRepository.findById(id).orElse(null);
     }

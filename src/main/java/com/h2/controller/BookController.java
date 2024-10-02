@@ -22,9 +22,4 @@ public class BookController {
     public Book getBookById(@PathVariable Long id) {
         return bookService.getBookById(id);
     }
-
-    @PostMapping
-    public Book saveBook(@RequestBody Book book) {
-        return bookService.saveBook(book);
-    }
 }
