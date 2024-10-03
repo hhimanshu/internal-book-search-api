@@ -320,3 +320,6 @@ JOIN book_authors ba ON b.book_id = ba.book_id
 JOIN authors a ON ba.author_id = a.author_id
 WHERE a.name = 'Steve Wozniak'; -- Sundar Pichai
 ```
+
+## Module 7: Designing and Creating APIs
+The API documentation is available [here](http://localhost:8080/swagger-ui/index.html)
