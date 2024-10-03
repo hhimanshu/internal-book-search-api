@@ -86,24 +86,22 @@
   - [x] Execute test suite
 
 ## Module 7: Designing and Creating APIs
+
 - [ ] Design RESTful API endpoints
-  - [] Search books
+  - [x Search books
   - [x] get books by author
   - [x] get books by publisher
 - [ ] Document API design
   - [ ] Create an API specification document
-- [ ] Implement API endpoints using Spring Boot
-  - [ ] Create controller classes for each endpoint
-  - [ ] Implement request handling and response generation
+- [x] Implement API endpoints using Spring Boot
+  - [x] Create controller classes for each endpoint
+  - [x] Implement request handling and response generation
 - [ ] Add input validation and error handling
   - [ ] Implement request parameter validation
   - [ ] Create meaningful error responses
-- [ ] Set up integration testing
-  - [ ] Choose an integration testing framework
-  - [ ] Set up test environment with in-memory database
 - [ ] Write integration tests
-  - [ ] Create test cases for each API endpoint
-  - [ ] Implement end-to-end test scenarios
+  - [x] Create test cases for each API endpoint
+  - [x] Implement end-to-end test scenarios
 - [ ] Perform manual API testing
   - [ ] Use Postman or cURL to test each endpoint
 - [ ] Create API documentation
