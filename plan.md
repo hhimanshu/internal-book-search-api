@@ -78,7 +78,7 @@
   - [x] Implement book search functionality
   - [x] Update importer to insert author, book_authors
   - [x] Get Books by Publisher
-  - [ ] Get Books by Author
+  - [x] Get Books by Author
 - [x] Set up JUnit for testing
   - [x] Add JUnit dependency to `pom.xml`
   - [x] Create a test directory structure

@@ -28,6 +28,9 @@ public class BookService {
     }
 
     public List<Book> searchBooks(String searchTerm) {
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            throw new IllegalArgumentException("Search term cannot be empty");
+        }
         return bookRepository.searchBooks(searchTerm);
     }
 
@@ -36,10 +39,16 @@ public class BookService {
     }
 
     public List<Book> getBooksByPublisher(String publisher) {
+        if (publisher == null || publisher.isEmpty()) {
+            throw new IllegalArgumentException("Publisher cannot be empty");
+        }
         return bookRepository.getBooksByPublisher(publisher);
     }
 
     public List<Book> getBooksByAuthor(String author) {
+        if (author == null || author.isEmpty()) {
+            throw new IllegalArgumentException("Author cannot be empty");
+        }
         Author authorObj = authorRepository.findByName(author);
         if (authorObj == null) {
             throw new IllegalArgumentException("Author not found");

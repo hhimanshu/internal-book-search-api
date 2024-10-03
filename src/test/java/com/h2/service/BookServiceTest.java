@@ -1,6 +1,7 @@
 package com.h2.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class BookServiceTest {
     }
 
     @Test
-    void testSearchBooks() {
+    void testSearchComputerScienceBooks() {
         List<Book> books = bookService.searchBooks("Algorithms");
         assertTrue(books.size() > 0);
         /*
@@ -40,12 +41,42 @@ public class BookServiceTest {
     }
 
     @Test
+    void testSearchWithNullInput() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            bookService.searchBooks(null);
+        });
+    }
+
+    @Test
+    void testSearchWithEmptyInput() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            bookService.searchBooks("");
+        });
+    }
+
+    @Test
+    void testSearchMathematicsBooks() {
+        List<Book> books = bookService.searchBooks("Calculus");
+        assertEquals(0, books.size());
+    }
+
+    @Test
     void testGetBooksByPublisher() {
         List<Book> books = bookService.getBooksByPublisher("MIT Press");
         assertTrue(books.size() > 0);
-        /* for (Book book : books) {
-            System.out.format("[Publisher: %s][Title: %s]\n", book.getPublisher(), book.getTitle());
-        } */
+        /*
+         * for (Book book : books) {
+         * System.out.format("[Publisher: %s][Title: %s]\n", book.getPublisher(),
+         * book.getTitle());
+         * }
+         */
+    }
+
+    @Test
+    void testGetBooksByPublisherWithEmptyInput() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            bookService.getBooksByPublisher("");
+        });
     }
 
     @Test
@@ -54,8 +85,17 @@ public class BookServiceTest {
         String authorName = "Jeff Bezos";
         List<Book> books = bookService.getBooksByAuthor(authorName);
         assertTrue(books.size() > 0);
-        /* for (Book book : books) {
-            System.out.format("[Author: %s][Title: %s]\n", authorName, book.getTitle());
-        } */
+        /*
+         * for (Book book : books) {
+         * System.out.format("[Author: %s][Title: %s]\n", authorName, book.getTitle());
+         * }
+         */
+    }
+
+    @Test
+    void testGetBooksByAuthorWithEmptyInput() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            bookService.getBooksByAuthor("");
+        });
     }
 }
