@@ -43,7 +43,7 @@ public class BookControllerTest {
     @Test
     void testSearchBooks() {
         String searchTerm = "Algorithms";
-        ResponseEntity<Book[]> response = restTemplate.getForEntity("/books/search?title={title}", Book[].class,
+        ResponseEntity<Book[]> response = restTemplate.getForEntity("/books/search?searchTerm={searchTerm}", Book[].class,
                 searchTerm);
 
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
