@@ -30,8 +30,8 @@ public class BookServiceTest {
     void testSearchBooks() {
         List<Book> books = bookService.searchBooks("Algorithms");
         assertTrue(books.size() > 0);
-        for (Book book : books) {
+        /* for (Book book : books) {
             System.out.format("Search Result: %s\n", book.getTitle());
-        }
+        } */
     }
 }
