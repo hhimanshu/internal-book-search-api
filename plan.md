@@ -96,14 +96,9 @@
 - [x] Implement API endpoints using Spring Boot
   - [x] Create controller classes for each endpoint
   - [x] Implement request handling and response generation
-- [ ] Add input validation and error handling
-  - [ ] Implement request parameter validation
-  - [ ] Create meaningful error responses
-- [ ] Write integration tests
+- [x] Write integration tests
   - [x] Create test cases for each API endpoint
   - [x] Implement end-to-end test scenarios
-- [ ] Perform manual API testing
-  - [ ] Use Postman or cURL to test each endpoint
-- [ ] Create API documentation
-  - [ ] Set up Swagger/OpenAPI
-  - [ ] Document each endpoint, including parameters and responses
+- [x] Perform manual API testing
+  - [x] Use Postman or cURL to test each endpoint
+- [x] Create API documentation
