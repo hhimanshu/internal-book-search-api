@@ -12,4 +12,5 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query(value = "SELECT * FROM books WHERE search_vector @@ to_tsquery(:searchTerm)", nativeQuery = true)
     List<Book> searchBooks(@Param("searchTerm") String searchTerm);
 
+    List<Book> getBooksByPublisher(String publisher);
 }

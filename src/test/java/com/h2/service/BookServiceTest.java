@@ -21,17 +21,30 @@ public class BookServiceTest {
     void testGetAllBooks() {
         List<Book> books = bookService.getAllBooks();
         assertEquals(20000, books.size());
-        /* for (Book book : books) {
-            System.out.format("Book: %s\n", book.getTitle());
-        } */
+        /*
+         * for (Book book : books) {
+         * System.out.format("Book: %s\n", book.getTitle());
+         * }
+         */
     }
 
     @Test
     void testSearchBooks() {
         List<Book> books = bookService.searchBooks("Algorithms");
         assertTrue(books.size() > 0);
+        /*
+         * for (Book book : books) {
+         * System.out.format("Search Result: %s\n", book.getTitle());
+         * }
+         */
+    }
+
+    @Test
+    void testGetBooksByPublisher() {
+        List<Book> books = bookService.getBooksByPublisher("MIT Press");
+        assertTrue(books.size() > 0);
         /* for (Book book : books) {
-            System.out.format("Search Result: %s\n", book.getTitle());
+            System.out.format("[Publisher: %s][Title: %s]\n", book.getPublisher(), book.getTitle());
         } */
     }
 }

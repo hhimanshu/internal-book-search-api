@@ -25,18 +25,19 @@ public class AuthorTest {
 
     @Test
     void testGetName() {
-        Author author = authorRepository.findById(1L).orElse(null);
+        Author author = authorRepository.findById(40L).orElse(null);
         System.out.println(String.format("Author: %s", author.toString()));
         assertNotNull(author.getName());
     }
 
     @Test
     void testRandomAuthor() {
-        long randomBetween1And500 = (int) (Math.random() * 500 + 1);
-        Author author = authorRepository.findById(randomBetween1And500).orElse(null);
+        long randomAuthorId = (long) (Math.random() * 9 + 1);
+        System.out.println(String.format("Random Author ID: %d", randomAuthorId));
+        Author author = authorRepository.findById(randomAuthorId).orElse(null);
         System.out.println(String.format("Author: %s", author.toString()));
         assertNotNull(author);
-        assertEquals(randomBetween1And500, author.getAuthorId());
+        assertEquals(randomAuthorId, author.getAuthorId());
         assertNotNull(author.getName());
     }
 }
