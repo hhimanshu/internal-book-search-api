@@ -71,9 +71,6 @@
 
 ## Module 6: Implementing Business Logic and Writing Tests
 
-> Write persistence layer with tests
-> Implement business logic functions with tests
-
 - [x] Define core business logic functions
   - [x] Implement book search functionality
   - [x] Update importer to insert author, book_authors
@@ -84,9 +81,9 @@
   - [x] Create a test directory structure
 - [x] Write unit tests
   - [x] Create test cases for each business logic function
-  - [ ] Implement edge case tests
-- [ ] Run tests and refine code
-  - [ ] Execute test suite
+  - [x] Implement edge case tests
+- [x] Run tests and refine code
+  - [x] Execute test suite
 
 ## Module 7: Designing and Creating APIs
 
