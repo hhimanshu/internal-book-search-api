@@ -77,7 +77,7 @@
 - [x] Define core business logic functions
   - [x] Implement book search functionality
   - [x] Update importer to insert author, book_authors
-  - [ ] Get Books by Publisher
+  - [x] Get Books by Publisher
   - [ ] Get Books by Author
 - [x] Set up JUnit for testing
   - [x] Add JUnit dependency to `pom.xml`

@@ -47,4 +47,15 @@ public class BookServiceTest {
             System.out.format("[Publisher: %s][Title: %s]\n", book.getPublisher(), book.getTitle());
         } */
     }
+
+    @Test
+    void testGetBooksByAuthor() {
+        // String author = "Tim Cook";
+        String authorName = "Jeff Bezos";
+        List<Book> books = bookService.getBooksByAuthor(authorName);
+        assertTrue(books.size() > 0);
+        /* for (Book book : books) {
+            System.out.format("[Author: %s][Title: %s]\n", authorName, book.getTitle());
+        } */
+    }
 }
