@@ -86,7 +86,6 @@
   - [x] Execute test suite
 
 ## Module 7: Designing and Creating APIs
-
 - [ ] Design RESTful API endpoints
   - [ ] Search books
   - [ ] get books by author
