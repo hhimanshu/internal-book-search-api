@@ -1,11 +1,10 @@
 package com.h2;
 
-import java.io.*;
-import java.math.BigDecimal;
 import java.net.*;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.io.*;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -55,92 +54,132 @@ public class DbImporter {
     private static List<String[]> parseCSV(InputStream csvStream) throws IOException, CsvValidationException {
         List<String[]> records = new ArrayList<>();
         BufferedReader reader = new BufferedReader(new InputStreamReader(csvStream));
-        String line;
-        StringBuilder sb = new StringBuilder();
-        boolean inQuotes = false;
-        boolean isFirstLine = true;
 
-        while ((line = reader.readLine()) != null) {
-            if (isFirstLine) {
-                isFirstLine = false;
-                continue; // Skip the header row
-            }
+        CSVParser parser = new CSVParserBuilder()
+                .withSeparator(',')
+                .build();
 
-            if (inQuotes) {
-                sb.append("\n").append(line);
-                if (line.endsWith("\"")) {
-                    inQuotes = false;
-                    records.add(parseLine(sb.toString()));
-                    sb.setLength(0);
-                }
-            } else {
-                if (line.startsWith("\"") && !line.endsWith("\"")) {
-                    inQuotes = true;
-                    sb.append(line);
-                } else {
-                    records.add(parseLine(line));
-                }
-            }
+        CSVReader csvReader = new CSVReaderBuilder(reader)
+                .withCSVParser(parser)
+                .build(); // Don't skip the header
+
+        String[] nextLine;
+        while ((nextLine = csvReader.readNext()) != null) {
+            records.add(nextLine);
         }
-        reader.close();
+
+        csvReader.close();
         return records;
     }
 
-    // Parse a single line using OpenCSV
-    private static String[] parseLine(String line) throws IOException, CsvValidationException {
-        CSVParser parser = new CSVParserBuilder()
-                .withSeparator(',')
-                .withQuoteChar('"')
-                .withEscapeChar('\\')
-                .withStrictQuotes(false)
-                .withIgnoreLeadingWhiteSpace(true)
-                .build();
-        CSVReader csvReader = new CSVReaderBuilder(new StringReader(line))
-                .withCSVParser(parser)
-                .build();
-        return csvReader.readNext();
-    }
-
-    // Insert data into the database
+    // Insert data into the database, including authors and book_authors tables
     private static void insertData(List<String[]> records) throws SQLException {
         Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+
+        String insertAuthorSQL = "INSERT INTO authors (name) VALUES (?) ON CONFLICT (name) DO NOTHING RETURNING author_id";
+        String selectAuthorSQL = "SELECT author_id FROM authors WHERE name = ?";
+        String insertBookSQL = "INSERT INTO books (title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING book_id";
+        String insertBookAuthorSQL = "INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)";
+
         conn.setAutoCommit(false);
 
-        String sql = "INSERT INTO books (book_id, title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement authorStmt = conn.prepareStatement(insertAuthorSQL);
+             PreparedStatement selectAuthorStmt = conn.prepareStatement(selectAuthorSQL);
+             PreparedStatement bookStmt = conn.prepareStatement(insertBookSQL);
+             PreparedStatement bookAuthorStmt = conn.prepareStatement(insertBookAuthorSQL)) {
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            for (String[] record : records) {
-                try {
-                    // Set parameters
-                    stmt.setInt(1, Integer.parseInt(record[0])); // book_id
-                    stmt.setString(2, record[1]); // title
-                    stmt.setBigDecimal(3, new BigDecimal(record[3])); // rating
-                    stmt.setString(4, record[4]); // description
-                    stmt.setString(5, record[5]); // language
-                    stmt.setString(6, record[6]); // isbn
-                    stmt.setString(7, record[7]); // book_format
-                    stmt.setString(8, record[8]); // edition
-                    stmt.setInt(9, Integer.parseInt(record[9])); // pages
-                    stmt.setString(10, record[10]); // publisher
-                    stmt.setDate(11, Date.valueOf(record[11])); // publish_date
-                    stmt.setDate(12, Date.valueOf(record[12])); // first_publish_date
-                    stmt.setBigDecimal(13, new BigDecimal(record[13])); // liked_percent
-                    stmt.setBigDecimal(14, new BigDecimal(record[14])); // price
-
-                    stmt.addBatch();
-                } catch (Exception e) {
-                    System.err.println("Failed to process record: " + Arrays.toString(record));
-                    e.printStackTrace();
-                }
+            String[] header = records.get(0);
+            Map<String, Integer> headerMap = new HashMap<>();
+            for (int i = 0; i < header.length; i++) {
+                headerMap.put(header[i], i);
             }
 
-            stmt.executeBatch();
+            for (int i = 1; i < records.size(); i++) {
+                String[] record = records.get(i);
+
+                String title = record[headerMap.get("title")];
+                String authorName = record[headerMap.get("author")];
+                double rating = Double.parseDouble(record[headerMap.get("rating")]);
+                String description = record[headerMap.get("description")];
+                String language = record[headerMap.get("language")];
+                String isbn = record[headerMap.get("isbn")];
+                String bookFormat = record[headerMap.get("bookFormat")];
+                String edition = record[headerMap.get("edition")];
+                int pages = Integer.parseInt(record[headerMap.get("pages")]);
+                String publisher = record[headerMap.get("publisher")];
+                String publishDateStr = record[headerMap.get("publishDate")];
+                String firstPublishDateStr = record[headerMap.get("firstPublishDate")];
+                double likedPercent = Double.parseDouble(record[headerMap.get("likedPercent")]);
+                double price = Double.parseDouble(record[headerMap.get("price")]);
+
+                // Insert into authors
+                int authorId;
+                authorStmt.setString(1, authorName);
+                ResultSet authorRS = authorStmt.executeQuery();
+                if (authorRS.next()) {
+                    authorId = authorRS.getInt("author_id");
+                } else {
+                    // Author already exists, retrieve ID
+                    selectAuthorStmt.setString(1, authorName);
+                    ResultSet selectAuthorRS = selectAuthorStmt.executeQuery();
+                    if (selectAuthorRS.next()) {
+                        authorId = selectAuthorRS.getInt("author_id");
+                    } else {
+                        throw new SQLException("Failed to retrieve author_id for " + authorName);
+                    }
+                    selectAuthorRS.close();
+                }
+                authorRS.close();
+
+                // Insert into books
+                int bookId;
+                bookStmt.setString(1, title);
+                bookStmt.setDouble(2, rating);
+                bookStmt.setString(3, description);
+                bookStmt.setString(4, language);
+                bookStmt.setString(5, isbn);
+                bookStmt.setString(6, bookFormat);
+                bookStmt.setString(7, edition);
+                bookStmt.setInt(8, pages);
+                bookStmt.setString(9, publisher);
+
+                // Handle possible null dates
+                Date publishDate = null;
+                Date firstPublishDate = null;
+                try {
+                    publishDate = Date.valueOf(publishDateStr);
+                } catch (Exception e) {
+                    // Date parsing failed, set to null
+                }
+                try {
+                    firstPublishDate = Date.valueOf(firstPublishDateStr);
+                } catch (Exception e) {
+                    // Date parsing failed, set to null
+                }
+                bookStmt.setDate(10, publishDate);
+                bookStmt.setDate(11, firstPublishDate);
+
+                bookStmt.setDouble(12, likedPercent);
+                bookStmt.setDouble(13, price);
+                ResultSet bookRS = bookStmt.executeQuery();
+                if (bookRS.next()) {
+                    bookId = bookRS.getInt("book_id");
+                } else {
+                    throw new SQLException("Failed to insert book " + title);
+                }
+                bookRS.close();
+
+                // Insert into book_authors
+                bookAuthorStmt.setInt(1, bookId);
+                bookAuthorStmt.setInt(2, authorId);
+                bookAuthorStmt.executeUpdate();
+            }
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();
-            e.printStackTrace();
+            throw e;
         } finally {
+            conn.setAutoCommit(true);
             conn.close();
         }
     }
