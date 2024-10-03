@@ -1,32 +1,49 @@
 package com.h2.repository;
 
-import com.h2.entity.Book;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import com.h2.entity.Book;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class BookRepositoryTest {
+
     @Autowired
     private BookRepository bookRepository;
 
     @Test
-    public void testFindAll() {
+    public void testAllBooks() {
         List<Book> books = bookRepository.findAll();
         assertNotNull(books);
-        assertTrue(books.size() > 0);
+        System.out.println(String.format("Number of books: %d", books.size()));
+        assertEquals(20000, books.size());
     }
 
-   /*  @Test
-    public void testSaveBook() {
-        Book book = new Book();
-        book.setTitle("Test Book");
-        book.setIsbn("1234567890");
-        book = bookRepository.save(book);
-        assertNotNull(book.getBookId());
-    } */
+    @Test
+    public void testBookById() {
+        Book book = bookRepository.findById(1L).orElse(null);
+        System.out.println(String.format("Book: %s", book.toString()));
+        assertNotNull(book);
+        assertNotNull(book.getTitle());
+        assertNotNull(book.getRating());
+        assertNotNull(book.getDescription());
+        assertNotNull(book.getLanguage());
+        assertNotNull(book.getIsbn());
+        assertNotNull(book.getBookFormat());
+        assertNotNull(book.getEdition());
+        assertNotNull(book.getPages());
+        assertNotNull(book.getPublisher());
+        assertNotNull(book.getPublishDate());
+        assertNotNull(book.getFirstPublishDate());
+        assertNotNull(book.getLikedPercent());
+        assertNotNull(book.getPrice());
+    }
 }
