@@ -13,4 +13,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> searchBooks(@Param("searchTerm") String searchTerm);
 
     List<Book> getBooksByPublisher(String publisher);
+
+    List<Book> getBooksByPublisher(Long publisherId);
 }
