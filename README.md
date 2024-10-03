@@ -162,7 +162,9 @@ FROM books
 WHERE title ILIKE '%hunger games%'
    OR description ILIKE '%hunger games%';
 ```
+
 - Discuss the limitations of case-insensitive search
+
 1. Case-insensitive search is not efficient for large datasets.
 2. It does not handle word variations (e.g., "game" vs. "games").
 3. It does not support partial word matches (e.g., "hunger" vs. "hunger games").
@@ -170,6 +172,7 @@ WHERE title ILIKE '%hunger games%'
 5. It does not provide advanced search features like phrase matching or stemming.
 
 - full-text search
+
 ```sql
 truncate table books cascade;
 
@@ -211,9 +214,10 @@ SELECT to_tsquery('english', 'dystopian & (future | world)') AS to_tsquery_resul
 ```
 
 - full-text search 1
+
 ```sql
 INSERT INTO books (title, description, isbn, rating, language, book_format, pages, publisher, publish_date)
-VALUES 
+VALUES
 ('Introduction to Algorithms', 'A comprehensive update of the leading algorithms text, with new material on matchings in bipartite graphs, online algorithms, machine learning, and other topics.', '9780262046305', 4.50, 'English', 'Hardcover', 1312, 'MIT Press', '2022-04-05'),
 ('Clean Code: A Handbook of Agile Software Craftsmanship', 'Even bad code can function. But if code isn''t clean, it can bring a development organization to its knees. This book is a must for any developer, software engineer, project manager, team lead, or systems analyst with an interest in producing better code.', '9780132350884', 4.39, 'English', 'Paperback', 464, 'Prentice Hall', '2008-08-11'),
 ('Design Patterns: Elements of Reusable Object-Oriented Software', 'Capturing a wealth of experience about the design of object-oriented software, four top-notch designers present a catalog of simple and succinct solutions to commonly occurring design problems.', '9780201633610', 4.19, 'English', 'Hardcover', 395, 'Addison-Wesley Professional', '1994-10-31'),
@@ -221,7 +225,7 @@ VALUES
 
 ALTER TABLE books ADD COLUMN search_vector tsvector;
 
-UPDATE books SET search_vector = 
+UPDATE books SET search_vector =
     setweight(to_tsvector('english', coalesce(title,'')), 'A') ||
     setweight(to_tsvector('english', coalesce(description,'')), 'B') ||
     setweight(to_tsvector('english', coalesce(isbn,'')), 'C');
@@ -249,7 +253,7 @@ SELECT to_tsquery('english', 'clean & code'), plainto_tsquery('english', 'clean 
 SELECT to_tsquery('english', 'algorithm:*');
 
 -- Example 8: Demonstrating normalization and stop word removal
-SELECT to_tsvector('english', 'The Algorithms are running quickly and efficiently');    
+SELECT to_tsvector('english', 'The Algorithms are running quickly and efficiently');
 
 
 -- Example 1a: Basic search using to_tsquery with a single term
@@ -305,10 +309,12 @@ SELECT title, ts_rank(search_vector, to_tsquery('english', 'design & (patterns |
 FROM books
 WHERE search_vector @@ to_tsquery('english', 'design & (patterns | algorithms) & !pragmatic')
 ORDER BY rank DESC;
-````
+```
 
 ## Module 5: Ingesting and Validating Data
+
 - Query after ingestion
+
 ```sql
 select count(*) from authors;
 select count(*) from books;
@@ -322,4 +328,25 @@ WHERE a.name = 'Steve Wozniak'; -- Sundar Pichai
 ```
 
 ## Module 7: Designing and Creating APIs
+
 The API documentation is available [here](http://localhost:8080/swagger-ui/index.html)
+
+### Test via `curl`
+
+- Search books
+
+```
+curl -X GET "http://localhost:8080/books/search?searchTerm=algorithms" -H "accept: application/json"
+```
+
+- Get books by author
+
+```
+curl -X GET "http://localhost:8080/authors/Tim%20Cook/books" -H "accept: application/json"
+```
+
+- Get books by publisher
+
+```
+curl -X GET "http://localhost:8080/publishers/Wiley/books" -H "accept: application/json"
+```
