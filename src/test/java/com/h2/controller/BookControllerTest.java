@@ -4,6 +4,8 @@ import com.h2.entity.Book;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,5 +38,19 @@ public class BookControllerTest {
         assertNotNull(body);
         assertThat(body.getBookId()).isEqualTo(bookId);
         assertThat(body.getTitle()).isNotBlank();
+    }
+
+    @Test
+    void testSearchBooks() {
+        String searchTerm = "Algorithms";
+        ResponseEntity<Book[]> response = restTemplate.getForEntity("/books/search?title={title}", Book[].class,
+                searchTerm);
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        Book[] books = response.getBody();
+        assertNotNull(books);
+        assertThat(books).hasSizeGreaterThan(0);
+        Arrays.stream(books).forEach(book -> assertThat(book.getTitle()).containsIgnoringCase(searchTerm));
+        System.out.println("Total books found for 'Algorithms': " + books.length);
     }
 }

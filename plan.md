@@ -87,9 +87,9 @@
 
 ## Module 7: Designing and Creating APIs
 - [ ] Design RESTful API endpoints
-  - [ ] Search books
-  - [ ] get books by author
-  - [ ] get books by publisher
+  - [] Search books
+  - [x] get books by author
+  - [x] get books by publisher
 - [ ] Document API design
   - [ ] Create an API specification document
 - [ ] Implement API endpoints using Spring Boot
