@@ -1,5 +1,7 @@
 -- SQL Schema
 
+-- csv
+--- bookId,title,author,rating,description,language,isbn,bookFormat,edition,pages,publisher,publishDate,firstPublishDate,likedPercent,price
 -- Books Table
 CREATE TABLE books (
     book_id SERIAL PRIMARY KEY,

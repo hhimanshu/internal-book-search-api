@@ -59,7 +59,7 @@ brew install maven
 - Crete the project
 
 ```
-mvn archetype:generate -DgroupId=com.h2 -DartifactId=book-search-api -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+mvn archetype:generate -DgroupId=com.h2 -DartifactId=book-search -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
 ```
 
 - Ensure project works
@@ -122,15 +122,28 @@ The run method executes the SQL query to get the PostgreSQL version and prints i
 ```
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
+- Create network
 
-- Setup PGAdmin
+```
+docker network create db-network
+```
+
+- Connect library-db to the network
+
+```
+docker network connect db-network library-db
+```
+
+- Setup [PGAdmin](https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html#examples)
 
   ```
   docker pull dpage/pgadmin4
-  docker run -p 80:80 \
-    -e 'PGADMIN_DEFAULT_EMAIL=user@domain.com' \
-    -e 'PGADMIN_DEFAULT_PASSWORD=SuperSecret' \
-    -d dpage/pgadmin4
+  ```
+  and run the container
+  ```
+  docker run -p 80:80 -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=SuperSecret --name pgadmin --network db-network -d dpage/pgadmin4
+  
+  docker run -p 80:80 -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=SuperSecret --name pgadmin --network book-search_default -d dpage/pgadmin4
   ```
 
   Visit `http://localhost:80` in your browser
@@ -213,15 +226,15 @@ SELECT to_tsquery('english', 'dystopian & (future | world)') AS to_tsquery_resul
        plainto_tsquery('english', 'future society dystopia') AS plainto_tsquery_result;
 ```
 
-- full-text search 1
+- [full-text](https://www.postgresql.org/docs/current/textsearch.html) search 1
 
 ```sql
-INSERT INTO books (title, description, isbn, rating, language, book_format, pages, publisher, publish_date)
+INSERT INTO books (title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price)
 VALUES
-('Introduction to Algorithms', 'A comprehensive update of the leading algorithms text, with new material on matchings in bipartite graphs, online algorithms, machine learning, and other topics.', '9780262046305', 4.50, 'English', 'Hardcover', 1312, 'MIT Press', '2022-04-05'),
-('Clean Code: A Handbook of Agile Software Craftsmanship', 'Even bad code can function. But if code isn''t clean, it can bring a development organization to its knees. This book is a must for any developer, software engineer, project manager, team lead, or systems analyst with an interest in producing better code.', '9780132350884', 4.39, 'English', 'Paperback', 464, 'Prentice Hall', '2008-08-11'),
-('Design Patterns: Elements of Reusable Object-Oriented Software', 'Capturing a wealth of experience about the design of object-oriented software, four top-notch designers present a catalog of simple and succinct solutions to commonly occurring design problems.', '9780201633610', 4.19, 'English', 'Hardcover', 395, 'Addison-Wesley Professional', '1994-10-31'),
-('The Pragmatic Programmer: Your Journey to Mastery', 'The Pragmatic Programmer is one of those rare tech books you''ll read, re-read, and read again over the years. Whether you''re new to the field or an experienced practitioner, you''ll come away with fresh insights each and every time.', '9780135957059', 4.38, 'English', 'Paperback', 352, 'Addison-Wesley Professional', '2019-09-13');
+('Introduction to Algorithms', 4.5, 'A comprehensive update of the leading algorithms text, with new material on matchings in bipartite graphs, online algorithms, machine learning, and other topics.', 'English', '9780262046305', 'Hardcover', '4th Edition', 1312, 'MIT Press', '2022-04-05', '1990-01-01', 89.75, 89.99),
+('Clean Code: A Handbook of Agile Software Craftsmanship', 4.4, 'Even bad code can function. But if code isn''t clean, it can bring a development organization to its knees. This book is a must for any developer, software engineer, project manager, team lead, or systems analyst with an interest in producing better code.', 'English', '9780132350884', 'Paperback', '1st Edition', 464, 'Prentice Hall', '2008-08-11', '2008-08-11', 87.50, 49.99),
+('Design Patterns: Elements of Reusable Object-Oriented Software', 4.2, 'Capturing a wealth of experience about the design of object-oriented software, four top-notch designers present a catalog of simple and succinct solutions to commonly occurring design problems.', 'English', '9780201633610', 'Hardcover', '1st Edition', 395, 'Addison-Wesley Professional', '1994-10-31', '1994-10-31', 83.75, 59.99),
+('The Pragmatic Programmer: Your Journey to Mastery', 4.4, 'The Pragmatic Programmer is one of those rare tech books you''ll read, re-read, and read again over the years. Whether you''re new to the field or an experienced practitioner, you''ll come away with fresh insights each and every time.', 'English', '9780135957059', 'Paperback', '20th Anniversary Edition', 352, 'Addison-Wesley Professional', '2019-09-13', '1999-10-30', 87.25, 39.99);
 
 ALTER TABLE books ADD COLUMN search_vector tsvector;
 
