@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "book_authors")
+@Table(name = "books_authors")
 public class BookAuthor {
 
     @EmbeddedId

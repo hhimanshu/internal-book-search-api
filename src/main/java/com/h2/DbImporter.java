@@ -45,7 +45,8 @@ public class DbImporter {
 
     // Download the CSV file from the URL
     private static InputStream downloadCSV(String urlStr) throws IOException {
-        URL url = new URL(urlStr);
+        URI uri = URI.create(urlStr);
+        URL url = uri.toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         return conn.getInputStream();
     }
@@ -79,7 +80,7 @@ public class DbImporter {
         String insertAuthorSQL = "INSERT INTO authors (name) VALUES (?) ON CONFLICT (name) DO NOTHING RETURNING author_id";
         String selectAuthorSQL = "SELECT author_id FROM authors WHERE name = ?";
         String insertBookSQL = "INSERT INTO books (title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING book_id";
-        String insertBookAuthorSQL = "INSERT INTO book_authors (book_id, author_id) VALUES (?, ?)";
+        String insertBookAuthorSQL = "INSERT INTO books_authors (book_id, author_id) VALUES (?, ?)";
 
         conn.setAutoCommit(false);
 
