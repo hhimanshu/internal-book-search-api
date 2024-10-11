@@ -59,7 +59,7 @@ brew install maven
 - Crete the project
 
 ```
-mvn archetype:generate -DgroupId=com.h2 -DartifactId=book-search-api -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+mvn archetype:generate -DgroupId=com.h2 -DartifactId=book-search -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
 ```
 
 - Ensure project works
@@ -122,15 +122,28 @@ The run method executes the SQL query to get the PostgreSQL version and prints i
 ```
 
 ## Module 4: Designing the Database Schema and Implementing Full-Text Search
+- Create network
 
-- Setup PGAdmin
+```
+docker network create db-network
+```
+
+- Connect library-db to the network
+
+```
+docker network connect db-network library-db
+```
+
+- Setup [PGAdmin](https://www.pgadmin.org/docs/pgadmin4/latest/container_deployment.html#examples)
 
   ```
   docker pull dpage/pgadmin4
-  docker run -p 80:80 \
-    -e 'PGADMIN_DEFAULT_EMAIL=user@domain.com' \
-    -e 'PGADMIN_DEFAULT_PASSWORD=SuperSecret' \
-    -d dpage/pgadmin4
+  ```
+  and run the container
+  ```
+  docker run -p 80:80 -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=SuperSecret --name pgadmin --network db-network -d dpage/pgadmin4
+  
+  docker run -p 80:80 -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=SuperSecret --name pgadmin --network book-search_default -d dpage/pgadmin4
   ```
 
   Visit `http://localhost:80` in your browser
@@ -162,7 +175,9 @@ FROM books
 WHERE title ILIKE '%hunger games%'
    OR description ILIKE '%hunger games%';
 ```
+
 - Discuss the limitations of case-insensitive search
+
 1. Case-insensitive search is not efficient for large datasets.
 2. It does not handle word variations (e.g., "game" vs. "games").
 3. It does not support partial word matches (e.g., "hunger" vs. "hunger games").
@@ -170,6 +185,7 @@ WHERE title ILIKE '%hunger games%'
 5. It does not provide advanced search features like phrase matching or stemming.
 
 - full-text search
+
 ```sql
 truncate table books cascade;
 
@@ -210,65 +226,108 @@ SELECT to_tsquery('english', 'dystopian & (future | world)') AS to_tsquery_resul
        plainto_tsquery('english', 'future society dystopia') AS plainto_tsquery_result;
 ```
 
-- Ignore this
+- [full-text](https://www.postgresql.org/docs/current/textsearch.html) search 1
+
 ```sql
--- First, let's add more varied data to our books table
-INSERT INTO books (title, series, description) VALUES
-('The Hunger Games', 'The Hunger Games #1', 'In a dystopian future, Katniss Everdeen voluntarily takes her younger sister''s place in the Hunger Games.'),
-('Catching Fire', 'The Hunger Games #2', 'Katniss Everdeen and Peeta Mellark become targets of the Capitol after their victory in the 74th Hunger Games.'),
-('Mockingjay', 'The Hunger Games #3', 'Katniss Everdeen reluctantly becomes the symbol of a mass rebellion against the autocratic Capitol.'),
-('The Ballad of Songbirds and Snakes', 'The Hunger Games #0', 'A prequel to the Hunger Games series, focusing on Coriolanus Snow''s youth.'),
-('1984', NULL, 'A dystopian novel by George Orwell about a totalitarian future society.'),
-('Brave New World', NULL, 'Aldous Huxley''s novel about a futuristic World State and its citizens.'),
-('The Giver', 'The Giver Quartet #1', 'In a seemingly perfect community, a boy is chosen to inherit the position of Receiver of Memories.'),
-('Divergent', 'Divergent #1', 'In a dystopian Chicago, society is divided into five factions. Beatrice Prior must choose her faction.'),
-('Ready Player One', NULL, 'In 2045, people seek escape from reality through the virtual reality world OASIS.');
+INSERT INTO books (title, rating, description, language, isbn, book_format, edition, pages, publisher, publish_date, first_publish_date, liked_percent, price)
+VALUES
+('Introduction to Algorithms', 4.5, 'A comprehensive update of the leading algorithms text, with new material on matchings in bipartite graphs, online algorithms, machine learning, and other topics.', 'English', '9780262046305', 'Hardcover', '4th Edition', 1312, 'MIT Press', '2022-04-05', '1990-01-01', 89.75, 89.99),
+('Clean Code: A Handbook of Agile Software Craftsmanship', 4.4, 'Even bad code can function. But if code isn''t clean, it can bring a development organization to its knees. This book is a must for any developer, software engineer, project manager, team lead, or systems analyst with an interest in producing better code.', 'English', '9780132350884', 'Paperback', '1st Edition', 464, 'Prentice Hall', '2008-08-11', '2008-08-11', 87.50, 49.99),
+('Design Patterns: Elements of Reusable Object-Oriented Software', 4.2, 'Capturing a wealth of experience about the design of object-oriented software, four top-notch designers present a catalog of simple and succinct solutions to commonly occurring design problems.', 'English', '9780201633610', 'Hardcover', '1st Edition', 395, 'Addison-Wesley Professional', '1994-10-31', '1994-10-31', 83.75, 59.99),
+('The Pragmatic Programmer: Your Journey to Mastery', 4.4, 'The Pragmatic Programmer is one of those rare tech books you''ll read, re-read, and read again over the years. Whether you''re new to the field or an experienced practitioner, you''ll come away with fresh insights each and every time.', 'English', '9780135957059', 'Paperback', '20th Anniversary Edition', 352, 'Addison-Wesley Professional', '2019-09-13', '1999-10-30', 87.25, 39.99);
 
--- Update the search vector for all books
+ALTER TABLE books ADD COLUMN search_vector tsvector;
+
 UPDATE books SET search_vector =
-    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(series, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(description, '')), 'C');
+    setweight(to_tsvector('english', coalesce(title,'')), 'A') ||
+    setweight(to_tsvector('english', coalesce(description,'')), 'B') ||
+    setweight(to_tsvector('english', coalesce(isbn,'')), 'C');
 
--- Example 1: Basic to_tsquery
-SELECT ts_rank(search_vector, to_tsquery('english', 'hunger & games')) AS rank, title, series, description
+
+-- Example 1: to_tsvector
+SELECT to_tsvector('english', 'Introduction to Algorithms');
+
+-- Example 2: to_tsvector with a longer text
+SELECT to_tsvector('english', 'A comprehensive update of the leading algorithms text, with new material on matchings in bipartite graphs, online algorithms, machine learning, and other topics.');
+
+-- Example 3: to_tsquery with a single word
+SELECT to_tsquery('english', 'algorithms');
+
+-- Example 4: to_tsquery with multiple words and operators
+SELECT to_tsquery('english', 'algorithms & (graphs | learning)');
+
+-- Example 5: plainto_tsquery
+SELECT plainto_tsquery('english', 'introduction to algorithms');
+
+-- Example 6: Comparing to_tsquery and plainto_tsquery
+SELECT to_tsquery('english', 'clean & code'), plainto_tsquery('english', 'clean code');
+
+-- Example 7: Using to_tsquery with prefix matching
+SELECT to_tsquery('english', 'algorithm:*');
+
+-- Example 8: Demonstrating normalization and stop word removal
+SELECT to_tsvector('english', 'The Algorithms are running quickly and efficiently');
+
+
+-- Example 1a: Basic search using to_tsquery with a single term
+SELECT title, ts_rank(search_vector, to_tsquery('english', 'algorithms')) as rank
 FROM books
-WHERE search_vector @@ to_tsquery('english', 'hunger & games')
+WHERE search_vector @@ to_tsquery('english', 'algorithms')
 ORDER BY rank DESC;
 
--- Example 2: phraseto_tsquery
-SELECT ts_rank(search_vector, phraseto_tsquery('english', 'Hunger Games')) AS rank, title, series, description
+-- Example 1b: Search using to_tsquery with multiple terms (OR)
+SELECT title, ts_rank(search_vector, to_tsquery('english', 'algorithms | design')) as rank
 FROM books
-WHERE search_vector @@ phraseto_tsquery('english', 'Hunger Games')
+WHERE search_vector @@ to_tsquery('english', 'algorithms | design')
 ORDER BY rank DESC;
 
--- Example 3: Complex to_tsquery
-SELECT ts_rank(search_vector, to_tsquery('english', 'dystopian & !hunger')) AS rank, title, series, description
+-- Example 1c: Search using to_tsquery with multiple terms (AND)
+SELECT title, ts_rank(search_vector, to_tsquery('english', 'algorithms & learning')) as rank
 FROM books
-WHERE search_vector @@ to_tsquery('english', 'dystopian & !hunger')
+WHERE search_vector @@ to_tsquery('english', 'algorithms & learning')
 ORDER BY rank DESC;
 
--- Example 4: Demonstrating how ts_rank works with field weights
-SELECT
-       ts_rank(search_vector, to_tsquery('english', 'dystopian')) AS default_rank,
-       ts_rank('{0.1, 0.2, 0.4, 1.0}', search_vector, to_tsquery('english', 'dystopian')) AS custom_rank,
-	   title, series, description
+-- Example 1d: Search using to_tsquery with prefix matching
+SELECT title, ts_rank(search_vector, to_tsquery('english', 'algorithm:*')) as rank
 FROM books
-WHERE search_vector @@ to_tsquery('english', 'dystopian')
-ORDER BY custom_rank DESC;
-
--- Example 5: Using plainto_tsquery for natural language input
-SELECT ts_rank(search_vector, plainto_tsquery('english', 'dystopian future')) AS rank, title, series, description
-FROM books
-WHERE search_vector @@ plainto_tsquery('english', 'dystopian future')
+WHERE search_vector @@ to_tsquery('english', 'algorithm:*')
 ORDER BY rank DESC;
 
--- How query works
-SELECT plainto_tsquery('english', 'dystopian future');
-````
+-- Example 2: Phrase search using phraseto_tsquery
+SELECT title, ts_rank(search_vector, phraseto_tsquery('english', 'object-oriented software')) as rank
+FROM books
+WHERE search_vector @@ phraseto_tsquery('english', 'object-oriented software')
+ORDER BY rank DESC;
+
+-- Example 3: Natural language search using plainto_tsquery
+SELECT title, ts_rank(search_vector, plainto_tsquery('english', 'clean code software development')) as rank
+FROM books
+WHERE search_vector @@ plainto_tsquery('english', 'clean code software development')
+ORDER BY rank DESC;
+
+-- Example 4: Combining fields in search
+SELECT title, ts_rank(search_vector, to_tsquery('english', 'programmer & (mastery | craftsmanship)')) as rank
+FROM books
+WHERE search_vector @@ to_tsquery('english', 'programmer & (mastery | craftsmanship)')
+ORDER BY rank DESC;
+
+-- Example 5: Searching with ISBN
+SELECT title, ts_rank(search_vector, plainto_tsquery('english', '9780135957059')) as rank
+FROM books
+WHERE search_vector @@ plainto_tsquery('english', '9780135957059')
+ORDER BY rank DESC;
+
+-- Example 6: Complex query with multiple terms
+SELECT title, ts_rank(search_vector, to_tsquery('english', 'design & (patterns | algorithms) & !pragmatic')) as rank
+FROM books
+WHERE search_vector @@ to_tsquery('english', 'design & (patterns | algorithms) & !pragmatic')
+ORDER BY rank DESC;
+```
 
 ## Module 5: Ingesting and Validating Data
+
 - Query after ingestion
+
 ```sql
 select count(*) from authors;
 select count(*) from books;
@@ -279,4 +338,28 @@ FROM books b
 JOIN book_authors ba ON b.book_id = ba.book_id
 JOIN authors a ON ba.author_id = a.author_id
 WHERE a.name = 'Steve Wozniak'; -- Sundar Pichai
+```
+
+## Module 7: Designing and Creating APIs
+
+The API documentation is available [here](http://localhost:8080/swagger-ui/index.html)
+
+### Test via `curl`
+
+- Search books
+
+```
+curl -X GET "http://localhost:8080/books/search?searchTerm=algorithms" -H "accept: application/json"
+```
+
+- Get books by author
+
+```
+curl -X GET "http://localhost:8080/authors/Tim%20Cook/books" -H "accept: application/json"
+```
+
+- Get books by publisher
+
+```
+curl -X GET "http://localhost:8080/publishers/Wiley/books" -H "accept: application/json"
 ```

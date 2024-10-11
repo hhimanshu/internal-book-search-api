@@ -23,8 +23,8 @@ public class BookController {
         return bookService.getBookById(id);
     }
 
-    @PostMapping
-    public Book saveBook(@RequestBody Book book) {
-        return bookService.saveBook(book);
+    @GetMapping("/search")
+    public List<Book> searchBooks(@RequestParam String searchTerm) {
+        return bookService.searchBooks(searchTerm);
     }
 }

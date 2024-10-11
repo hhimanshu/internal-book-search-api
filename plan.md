@@ -71,40 +71,34 @@
 
 ## Module 6: Implementing Business Logic and Writing Tests
 
-- [ ] Define core business logic functions
-  - [ ] Implement book search functionality
-  - [ ] Create methods for filtering and sorting results
-- [ ] Set up JUnit for testing
-  - [ ] Add JUnit dependency to `pom.xml`
-  - [ ] Create a test directory structure
-- [ ] Write unit tests
-  - [ ] Create test cases for each business logic function
-  - [ ] Implement edge case tests
-- [ ] Run tests and refine code
-  - [ ] Execute test suite
-  - [ ] Analyze test results and fix any issues
+- [x] Define core business logic functions
+  - [x] Implement book search functionality
+  - [x] Update importer to insert author, book_authors
+  - [x] Get Books by Publisher
+  - [x] Get Books by Author
+- [x] Set up JUnit for testing
+  - [x] Add JUnit dependency to `pom.xml`
+  - [x] Create a test directory structure
+- [x] Write unit tests
+  - [x] Create test cases for each business logic function
+  - [x] Implement edge case tests
+- [x] Run tests and refine code
+  - [x] Execute test suite
 
 ## Module 7: Designing and Creating APIs
 
 - [ ] Design RESTful API endpoints
-  - [ ] Define endpoints for searching, filtering, and retrieving books
-  - [ ] Determine request and response formats
+  - [x Search books
+  - [x] get books by author
+  - [x] get books by publisher
 - [ ] Document API design
   - [ ] Create an API specification document
-- [ ] Implement API endpoints using Blade
-  - [ ] Create controller classes for each endpoint
-  - [ ] Implement request handling and response generation
-- [ ] Add input validation and error handling
-  - [ ] Implement request parameter validation
-  - [ ] Create meaningful error responses
-- [ ] Set up integration testing
-  - [ ] Choose an integration testing framework
-  - [ ] Set up test environment with in-memory database
-- [ ] Write integration tests
-  - [ ] Create test cases for each API endpoint
-  - [ ] Implement end-to-end test scenarios
-- [ ] Perform manual API testing
-  - [ ] Use Postman or cURL to test each endpoint
-- [ ] Create API documentation
-  - [ ] Set up Swagger/OpenAPI
-  - [ ] Document each endpoint, including parameters and responses
+- [x] Implement API endpoints using Spring Boot
+  - [x] Create controller classes for each endpoint
+  - [x] Implement request handling and response generation
+- [x] Write integration tests
+  - [x] Create test cases for each API endpoint
+  - [x] Implement end-to-end test scenarios
+- [x] Perform manual API testing
+  - [x] Use Postman or cURL to test each endpoint
+- [x] Create API documentation

@@ -24,6 +24,8 @@ public class Book {
     private Date firstPublishDate;
     private BigDecimal likedPercent;
     private BigDecimal price;
+    @Column(name = "search_vector", columnDefinition = "tsvector")
+    private String searchVector;
 
     public Long getBookId() {
         return bookId;
@@ -36,6 +38,7 @@ public class Book {
     public BigDecimal getRating() {
         return rating;
     }
+
     public String getDescription() {
         return description;
     }
@@ -78,5 +81,25 @@ public class Book {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"bookId\":" + bookId +
+                ", \"title\":\"" + title + '\"' +
+                ", \"rating\":" + rating +
+                ", \"description\":\"" + description + '\"' +
+                ", \"language\":\"" + language + '\"' +
+                ", \"isbn\":\"" + isbn + '\"' +
+                ", \"bookFormat\":\"" + bookFormat + '\"' +
+                ", \"edition\":\"" + edition + '\"' +
+                ", \"pages\":" + pages +
+                ", \"publisher\":\"" + publisher + '\"' +
+                ", \"publishDate\":\"" + publishDate + '\"' +
+                ", \"firstPublishDate\":\"" + firstPublishDate + '\"' +
+                ", \"likedPercent\":" + likedPercent +
+                ", \"price\":" + price +
+                '}';
     }
 }
